@@ -10,9 +10,9 @@ datasource db {
 model Contact {
   id Int @id @default(autoincrement())
 
-  email String?
+  email String? @db.VarChar(255)
 
-  phoneNumber String?
+  phoneNumber String? @db.VarChar(20)
 
   linkedId Int?
 
@@ -24,10 +24,12 @@ model Contact {
 
   deletedAt DateTime?
 
-  // self relation
-  primaryContact    Contact?  @relation("ContactLink", fields: [linkedId], references: [id])
+  /// self relation
+  primaryContact Contact? @relation("ContactLink", fields: [linkedId], references: [id], onDelete: SetNull)
+
   secondaryContacts Contact[] @relation("ContactLink")
 
+  /// indexes for fast lookup
   @@index([email])
   @@index([phoneNumber])
   @@index([linkedId])
