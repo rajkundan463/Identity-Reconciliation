@@ -1,12 +1,13 @@
+
 import {
   Users,
   LayoutDashboard,
   Settings
 } from "lucide-react"
 
-import clsx from "clsx"
 import { ReactNode } from "react"
 import { Link, useLocation } from "react-router-dom"
+import clsx from "clsx"
 
 interface Props {
   children: ReactNode
@@ -23,38 +24,40 @@ export default function DashboardLayout({
       {/* SIDEBAR */}
       <aside
         className="
-        w-64
-        bg-white
-        border-r
-        shadow-sm
-        flex
-        flex-col
+          w-64
+          bg-white
+          border-r
+          shadow-sm
+          flex
+          flex-col
         "
       >
 
+        {/* LOGO */}
         <div className="p-6 font-bold text-xl border-b">
-
           IdentityGraph
-
         </div>
 
 
+        {/* NAVIGATION */}
         <nav className="flex-1 p-4 space-y-2">
 
           <SidebarItem
-            icon={<LayoutDashboard size={18}/>}
+            icon={<LayoutDashboard size={18} />}
             label="Dashboard"
-            active
+            to="/"
           />
 
           <SidebarItem
-            icon={<Users size={18}/>}
+            icon={<Users size={18} />}
             label="Contacts"
+            to="/contacts"
           />
 
           <SidebarItem
-            icon={<Settings size={18}/>}
+            icon={<Settings size={18} />}
             label="Settings"
+            to="/settings"
           />
 
         </nav>
@@ -62,17 +65,17 @@ export default function DashboardLayout({
       </aside>
 
 
-      {/* MAIN */}
+      {/* MAIN AREA */}
       <div className="flex-1 flex flex-col">
 
         {/* HEADER */}
         <header
           className="
-          bg-white
-          border-b
-          px-6
-          py-4
-          font-semibold
+            bg-white
+            border-b
+            px-6
+            py-4
+            font-semibold
           "
         >
           Identity Reconciliation Dashboard
@@ -82,9 +85,9 @@ export default function DashboardLayout({
         {/* CONTENT */}
         <main
           className="
-          flex-1
-          overflow-auto
-          p-6
+            flex-1
+            overflow-auto
+            p-6
           "
         >
           {children}
@@ -96,30 +99,41 @@ export default function DashboardLayout({
   )
 }
 
-
+interface SidebarItemProps {
+  icon: ReactNode
+  label: string
+  to: string
+}
 
 function SidebarItem({
   icon,
   label,
-  active
-}: any) {
+  to
+}: SidebarItemProps) {
+
+  const location = useLocation()
+
+  const active =
+    location.pathname === to
 
   return (
 
-    <div
+    <Link
+      to={to}
       className={clsx(
-        "flex items-center gap-3 p-3 rounded cursor-pointer",
+        "flex items-center gap-3 p-3 rounded transition-colors",
 
         active
           ? "bg-blue-50 text-blue-600"
-          : "hover:bg-gray-100"
+          : "hover:bg-gray-100 text-gray-700"
       )}
     >
+
       {icon}
 
-      {label}
+      <span>{label}</span>
 
-    </div>
+    </Link>
 
   )
 }
