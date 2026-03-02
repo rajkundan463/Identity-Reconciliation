@@ -1,105 +1,191 @@
 const prisma = require("../config/prisma");
 
-// FIND ROOT PRIMARY (like Union-Find find())
 
-function findPrimary(contact, allContacts) {
+/* Resolve true root primary
+ -> Uses iterative resolution */
 
-  if (contact.linkPrecedence === "primary")
-    return contact;
+async function resolvePrimary(contact, cache) {
 
-  return allContacts.find(
-    c => c.id === contact.linkedId
-  );
-}
+  if (cache.has(contact.id))
+    return cache.get(contact.id);
 
-// GET FULL CONNECTED COMPONENT
- 
-async function getFullComponent(primaryId) {
+  let current = contact;
 
-  return prisma.contact.findMany({
-    where: {
-      OR: [
-        { id: primaryId },
-        { linkedId: primaryId }
-      ],
-      deletedAt: null
-    },
-    orderBy: {
-      createdAt: "asc"
+  while (
+    current.linkPrecedence === "secondary" &&
+    current.linkedId
+  ) {
+
+    if (cache.has(current.linkedId)) {
+      current = cache.get(current.linkedId);
+      break;
     }
-  });
+
+    current =
+      await prisma.contact.findUnique({
+        where: { id: current.linkedId }
+      });
+
+  }
+
+  cache.set(contact.id, current);
+
+  return current;
 }
 
 
-// MAIN IDENTIFY FUNCTION
- 
+/* Fetch FULL connected component safely */
+
+async function getFullComponent(rootId) {
+
+  const all =
+    await prisma.contact.findMany({
+      where: { deletedAt: null },
+      orderBy: { createdAt: "asc" }
+    });
+
+  const result = [];
+
+  const cache = new Map();
+
+  for (const contact of all) {
+
+    const primary =
+      await resolvePrimary(contact, cache);
+
+    if (primary.id === rootId)
+      result.push(contact);
+  }
+
+  return result;
+}
+
+
+/* Format response according to spec */
+
+function formatResponse(contacts) {
+
+  const primary =
+    contacts.find(
+      c => c.linkPrecedence === "primary"
+    );
+
+  const emails =
+    [
+      ...new Set(
+        contacts
+          .map(c => c.email)
+          .filter(Boolean)
+      )
+    ];
+
+  const phoneNumbers =
+    [
+      ...new Set(
+        contacts
+          .map(c => c.phoneNumber)
+          .filter(Boolean)
+      )
+    ];
+
+  const secondaryContactIds =
+    contacts
+      .filter(
+        c => c.linkPrecedence === "secondary"
+      )
+      .map(c => c.id);
+
+
+  return {
+
+    contact: {
+
+      primaryContatctId: primary.id,
+
+      emails,
+
+      phoneNumbers,
+
+      secondaryContactIds
+
+    }
+
+  };
+
+}
+
+
+/* MAIN IDENTIFY FUNCTION */
+
 async function identify(email, phoneNumber) {
 
   if (!email && !phoneNumber)
-    throw new Error("email or phone required");
+    throw new Error(
+      "email or phoneNumber required"
+    );
 
-  
-// STEP 1
-// find all matching nodes
-   
-  const matches = await prisma.contact.findMany({
-    where: {
-      OR: [
-        email ? { email } : undefined,
-        phoneNumber ? { phoneNumber } : undefined
-      ].filter(Boolean),
-      deletedAt: null
-    },
-    orderBy: {
-      createdAt: "asc"
-    }
-  });
 
-// STEP 2
-// no component exists → create new
-   
+  // STEP 1 find matches
+  const conditions = [];
+
+  if (email)
+    conditions.push({ email });
+
+  if (phoneNumber)
+    conditions.push({ phoneNumber });
+
+
+  const matches =
+    await prisma.contact.findMany({
+
+      where: {
+        OR: conditions,
+        deletedAt: null
+      },
+
+      orderBy: {
+        createdAt: "asc"
+      }
+
+    });
+
+
+  // STEP 2 create primary if none
   if (matches.length === 0) {
 
-    const newContact =
+    const created =
       await prisma.contact.create({
+
         data: {
           email,
           phoneNumber,
           linkPrecedence: "primary"
         }
+
       });
 
-    return formatResponse([newContact]);
+    return formatResponse([created]);
   }
 
 
-//  STEP 3
-//  find all primaries involved
-
-  let primaries = [];
+  // STEP 3 resolve all primaries
+  const cache = new Map();
+  const primaryMap = new Map();
 
   for (const contact of matches) {
 
-    if (contact.linkPrecedence === "primary")
-      primaries.push(contact);
+    const primary =
+      await resolvePrimary(contact, cache);
 
-    else {
-
-      const primary =
-        matches.find(
-          c => c.id === contact.linkedId
-        ) ||
-        await prisma.contact.findUnique({
-          where: { id: contact.linkedId }
-        });
-
-      primaries.push(primary);
-    }
+    primaryMap.set(primary.id, primary);
   }
 
-// STEP 4
-// choose OLDEST primary (DSU root)
 
+  const primaries =
+    Array.from(primaryMap.values());
+
+
+  // STEP 4 choose OLDEST root
   primaries.sort(
     (a,b) =>
       new Date(a.createdAt)
@@ -110,106 +196,80 @@ async function identify(email, phoneNumber) {
   const root = primaries[0];
 
 
-// STEP 5
-// UNION operation
-// convert other primaries → secondary
+  // STEP 5 enforce union
+  await prisma.$transaction(async (tx) => {
 
-  for (const p of primaries) {
+    // ensure root is primary
+    await tx.contact.update({
 
-    if (p.id === root.id)
-      continue;
+      where: { id: root.id },
 
-    await prisma.contact.update({
-      where: { id: p.id },
       data: {
-        linkPrecedence: "secondary",
-        linkedId: root.id
+        linkPrecedence: "primary",
+        linkedId: null
       }
+
     });
-  }
-// STEP 6
-// check if new node needed
-
-  const emailExists =
-    matches.some(c => c.email === email);
-
-  const phoneExists =
-    matches.some(c => c.phoneNumber === phoneNumber);
 
 
-  if (
-    (email && !emailExists)
-    ||
-    (phoneNumber && !phoneExists)
-  ) {
+    for (const p of primaries) {
 
-    await prisma.contact.create({
-      data: {
-        email,
-        phoneNumber,
-        linkedId: root.id,
-        linkPrecedence: "secondary"
-      }
-    });
-  }
-// STEP 7
-// fetch full component
+      if (p.id === root.id)
+        continue;
+
+      await tx.contact.update({
+
+        where: { id: p.id },
+
+        data: {
+          linkPrecedence: "secondary",
+          linkedId: root.id
+        }
+
+      });
+
+    }
+
+
+    const emailExists =
+      matches.some(
+        c => c.email === email
+      );
+
+    const phoneExists =
+      matches.some(
+        c => c.phoneNumber === phoneNumber
+      );
+
+
+    if (
+      (email && !emailExists)
+      ||
+      (phoneNumber && !phoneExists)
+    ) {
+
+      await tx.contact.create({
+
+        data: {
+          email,
+          phoneNumber,
+          linkedId: root.id,
+          linkPrecedence: "secondary"
+        }
+
+      });
+
+    }
+
+  });
+
+
+  // STEP 6 fetch FULL component
   const component =
     await getFullComponent(root.id);
 
 
   return formatResponse(component);
-}
-
-// FORMAT RESPONSE
-
-function formatResponse(contacts) {
-
-  const primary =
-    contacts.find(
-      c => c.linkPrecedence === "primary"
-    );
-
-  const emails =
-    [...new Set(
-      contacts
-        .map(c => c.email)
-        .filter(Boolean)
-    )];
-
-  const phones =
-    [...new Set(
-      contacts
-        .map(c => c.phoneNumber)
-        .filter(Boolean)
-    )];
-
-  const secondaryIds =
-    contacts
-      .filter(
-        c =>
-        c.linkPrecedence === "secondary"
-      )
-      .map(c => c.id);
-
-
-  return {
-
-    contact: {
-
-      primaryContatctId:
-        primary.id,
-
-      emails,
-
-      phoneNumbers: phones,
-
-      secondaryContactIds:
-        secondaryIds
-
-    }
-
-  };
 
 }
 

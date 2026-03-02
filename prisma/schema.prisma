@@ -4,34 +4,32 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Contact {
+  id Int @id @default(autoincrement())
 
-  id             Int       @id @default(autoincrement())
+  email String?
 
-  email          String?
+  phoneNumber String?
 
-  phoneNumber    String?
-
-  linkedId       Int?
+  linkedId Int?
 
   linkPrecedence LinkPrecedence
 
-  createdAt      DateTime  @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt      DateTime  @updatedAt
+  updatedAt DateTime @updatedAt
 
-  deletedAt      DateTime?
+  deletedAt DateTime?
 
-  primaryContact Contact?  @relation("ContactLink", fields: [linkedId], references: [id])
-
+  // self relation
+  primaryContact    Contact?  @relation("ContactLink", fields: [linkedId], references: [id])
   secondaryContacts Contact[] @relation("ContactLink")
 
   @@index([email])
-
   @@index([phoneNumber])
-
   @@index([linkedId])
 }
 
