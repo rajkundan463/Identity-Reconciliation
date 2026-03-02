@@ -50,9 +50,13 @@ export default function ContactSummary() {
 
     <>
       <Card
-        title={
-          <div className="flex justify-between items-center">
-            <span>Contact Summary</span>
+        title="Contact Summary"
+      >
+
+        <div className="space-y-4">
+
+          <div className="flex justify-between items-center mb-4">
+            <span></span>
 
             <button
               onClick={openGraph}
@@ -63,10 +67,6 @@ export default function ContactSummary() {
                 : "View Graph"}
             </button>
           </div>
-        }
-      >
-
-        <div className="space-y-4">
 
           <div>
             <div className="text-sm text-gray-500">
