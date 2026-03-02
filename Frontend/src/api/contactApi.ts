@@ -3,6 +3,7 @@
 import { apiClient } from "./client"
 import type { IdentifyResponse } from "../types/contact"
 
+
 export const identifyContact =
 async (
   email?: string,
@@ -25,6 +26,15 @@ async (id: number) => {
     await apiClient.get<IdentifyResponse>(
       `/contacts/${id}`
     )
+
+  return res.data
+}
+
+export const getAllContacts =
+async () => {
+
+  const res =
+    await apiClient.get("/contacts")
 
   return res.data
 }

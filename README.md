@@ -164,6 +164,12 @@ node src/app.js
 Example:
 
 ```
+curl -X POST https://identity-reconciliation-zvcl.onrender.com/api/identify \
+-H "Content-Type: application/json" \
+-d '{"email":"doc@flux.com","phoneNumber":"999999"}'
+
+OR
+
 curl -X POST http://localhost:5000/api/identify \
 -H "Content-Type: application/json" \
 -d '{"email":"doc@flux.com","phoneNumber":"999999"}'
