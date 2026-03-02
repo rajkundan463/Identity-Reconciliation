@@ -1,12 +1,12 @@
-# Identity Reconciliation Service
+# Identity Reconciliation Service (Backend)
 
 A production‑ready backend service that reconciles customer identities across multiple email addresses and phone numbers.  
 Built for the **Bitespeed Identity Reconciliation Task**, with a scalable architecture and graph‑ready API for modern dashboards.
 
 ---
 
-## 🚀 Live Endpoint
-**Base URL:** https://YOUR-DEPLOYMENT-URL.com  
+## Live Endpoint
+**Base URL:** https://identity-reconciliation-zvcl.onrender.com
 **Identify Endpoint:**
 
 ```
@@ -17,7 +17,7 @@ POST /api/identify
 
 ---
 
-## 🧠 Problem Solved
+## Problem Solved
 
 Customers may use different emails or phone numbers across purchases.  
 This service:
@@ -75,7 +75,7 @@ identity-reconciliation/
 ### 1. Clone repository
 
 ```
-git clone https://github.com/YOUR_USERNAME/identity-reconciliation.git
+git clone https://github.com/rajkundan463/Identity-Reconciliation
 cd identity-reconciliation
 ```
 
@@ -90,8 +90,8 @@ npm install
 Create `.env`:
 
 ```
-DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/identity"
-PORT=3000
+DATABASE_URL="postgresql://USER:PASSWORD@<PORT>/identity"
+PORT=5000
 ```
 
 ### 4. Run migrations
@@ -114,7 +114,7 @@ node src/app.js
 
 ---
 
-## 📡 API Documentation
+##  API Documentation
 
 ### Identify Contact
 
@@ -148,13 +148,14 @@ node src/app.js
 
 ---
 
-## 📊 Additional Endpoints
+## 📊 Additional Endpoints 
 
 | Method | Endpoint | Description |
 |------|---------|-------------|
 | POST | /api/identify | reconcile identity |
 | GET | /api/contacts | list contacts |
 | GET | /api/contacts/:id | contact graph |
+
 
 ---
 
@@ -163,7 +164,7 @@ node src/app.js
 Example:
 
 ```
-curl -X POST http://localhost:3000/api/identify \
+curl -X POST http://localhost:5000/api/identify \
 -H "Content-Type: application/json" \
 -d '{"email":"doc@flux.com","phoneNumber":"999999"}'
 ```
@@ -172,10 +173,9 @@ curl -X POST http://localhost:3000/api/identify \
 
 ## 🌐 Deployment
 
-Recommended:
 
 - Render.com
-- Railway.app
+
 
 Steps:
 
