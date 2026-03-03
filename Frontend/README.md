@@ -1,73 +1,173 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+#  Identity Reconciliation – Premium Frontend
 
-Currently, two official plugins are available:
+🌐 Live Demo  
+https://identity-reconciliation-two.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 📌 Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This is a production-style frontend dashboard built for the Identity Reconciliation System.
 
-## Expanding the ESLint configuration
+The application allows:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+• Identify contacts via email/phone  
+• View consolidated identity summary  
+• Visualize identity relationships using an interactive graph  
+• Explore contact history  
+• Inspect identity relationships dynamically  
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Designed with a premium SaaS-level UI/UX approach.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Product Vision
+
+"Unify Identities. Visualize Relationships."
+
+This project simulates how modern systems like:
+
+• Customer Data Platforms (CDP)  
+• Fraud Detection Dashboards  
+• CRM Systems  
+• Identity Graph Engines  
+
+display linked identity data.
+
+---
+
+## 🏗️ Tech Stack
+
+React (Vite)  
+TypeScript  
+TailwindCSS  
+React Query (Server State)  
+Zustand (Global State Management)  
+Axios (API Layer)  
+React Flow (Graph Visualization)  
+Framer Motion (Animations)  
+React Router  
+
+---
+
+## ✨ Premium Features
+
+### 🔹 Dashboard
+• Identify Contact Form  
+• Contact Summary Modal  
+• Contact History Button with Dynamic Badge Counter  
+• Animated Page Transitions  
+• Breadcrumb Navigation  
+
+### 🔹 Contacts Page
+• Contact History List  
+• Premium Hover Animations  
+• Click-to-Open Contact Summary Modal  
+• Smooth UI transitions  
+
+### 🔹 Identity Graph
+• Primary node centered  
+• Secondary nodes radial layout  
+• Animated edges  
+• Draggable nodes  
+• Zoom & Pan controls  
+• Responsive container sizing  
+• Legend indicator  
+• Auto fit view with padding  
+
+---
+
+## UI Enhancements
+
+• Top Navbar layout (modern SaaS style)  
+• Gradient background  
+• Hover scaling effects  
+• Modal-based detail inspection  
+• Responsive design  
+• Premium headline quotes  
+
+---
+
+## 📂 Project Structure
+
+src/
+
+├── api/  
+├── components/  
+├── layouts/  
+├── pages/  
+├── store/  
+└── App.tsx  
+
+---
+
+## 🌐 API Integration
+
+Connected to backend endpoints:
+
+POST /identify  
+GET /contacts  
+GET /contacts/:id  
+
+Configured via Axios client.
+
+---
+
+## ⚙️ Local Setup
+
+### 1. Clone repository
+
+```
+git clone https://github.com/rajkundan463/Identity-Reconciliation
+cd identity-reconciliation/Frontend
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+npm install
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 3. Run locally
+
+npm run dev
+
+---
+
+## Deployment
+
+Hosted on Vercel:
+
+https://identity-reconciliation-two.vercel.app/
+
+---
+
+## Why This Project Stands Out
+
+• Clean scalable architecture  
+• Production-level state management  
+• Lazy graph loading  
+• Responsive graph layout  
+• Modern SaaS UI patterns  
+• Performance-optimized rendering  
+• Clear separation of API and UI layers  
+
+---
+
+## Future Enhancements
+
+• Force-directed graph physics  
+• Dark mode toggle  
+• Search & filter  
+• Pagination  
+• Real-time updates  
+• Graph expand/collapse  
+• Edge highlighting  
+
+---
+## 👨‍💻 Author
+
+Your Name  
+GitHub: https://github.com/rajkundan463  
+
+
+Generated on: 2026-03-03 06:27:09

@@ -1,4 +1,4 @@
-import { Users, LayoutDashboard, Settings } from "lucide-react"
+import { Users, LayoutDashboard} from "lucide-react"
 import type { ReactNode } from "react"
 import { Link, useLocation } from "react-router-dom"
 import clsx from "clsx"
@@ -29,7 +29,7 @@ export default function DashboardLayout({
 
         {/* LOGO */}
         <div className="p-6 font-bold text-xl border-b">
-          IdentityGraph
+          TraceIdentity
         </div>
 
 
@@ -48,11 +48,6 @@ export default function DashboardLayout({
             to="/contacts"
           />
 
-          <SidebarItem
-            icon={<Settings size={18} />}
-            label="Settings"
-            to="/settings"
-          />
 
         </nav>
 

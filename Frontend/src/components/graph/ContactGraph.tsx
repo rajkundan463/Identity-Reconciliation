@@ -1,98 +1,162 @@
 import ReactFlow, {
   Background,
   Controls,
-  MiniMap
+  MiniMap,
+  useNodesState,
+  useEdgesState
 } from "reactflow"
 
 import type { Node, Edge } from "reactflow"
 
 import "reactflow/dist/style.css"
 
-import { useMemo } from "react"
 import { useContactStore } from "../../store/contactStore"
-import GraphNode from "./GraphNode"
-
-const nodeTypes = {
-  custom: GraphNode
-}
+import { useEffect, useRef } from "react"
 
 export default function ContactGraph() {
 
   const graph =
     useContactStore(state => state.graph)
 
-  const nodes: Node[] =
-    useMemo(() => {
+  const containerRef = useRef<HTMLDivElement>(null)
 
-      if (!graph) return []
+  const [nodes, setNodes, onNodesChange] =
+    useNodesState([])
 
-      return graph.nodes.map(
-        (node, index) => ({
+  const [edges, setEdges, onEdgesChange] =
+    useEdgesState([])
 
-          id: node.id,
+  useEffect(() => {
 
-          type: "custom",
+    if (!graph || !containerRef.current) return
 
-          position: {
-            x: 250,
-            y: index * 120
-          },
+    const width =
+      containerRef.current.offsetWidth
 
-          data: {
-            label:
-              `${node.type.toUpperCase()} (${node.id})`,
-            type: node.type
-          }
-        })
-      )
+    const height =
+      containerRef.current.offsetHeight
 
-    }, [graph])
+    const centerX = width / 2
+    const centerY = height / 2
 
+    const primary =
+      graph.nodes.find(n => n.type === "primary")
 
-  const edges: Edge[] =
-    useMemo(() => {
+    const secondaries =
+      graph.nodes.filter(n => n.type === "secondary")
 
-      if (!graph) return []
+    const newNodes: Node[] = []
 
-      return graph.edges.map(
-        (edge, index) => ({
+    // PRIMARY CENTER
+    if (primary) {
+      newNodes.push({
+        id: primary.id,
+        position: { x: centerX, y: centerY },
+        data: { label: `ID: ${primary.id}` },
+        style: {
+          background: "#16a34a",
+          color: "white",
+          padding: 14,
+          borderRadius: 12,
+          fontWeight: 600
+        }
+      })
+    }
 
-          id: String(index),
+    // Dynamic radius based on container
+    const radius =
+      Math.min(width, height) / 3
 
-          source: edge.source,
+    const angleStep =
+      (2 * Math.PI) /
+      (secondaries.length || 1)
 
-          target: edge.target,
+    secondaries.forEach((node, index) => {
 
-          animated: true
-        }))
-    }, [graph])
+      const angle = index * angleStep
 
+      const x =
+        centerX + radius * Math.cos(angle)
 
-  if (!graph) {
-    return (
-      <div className="h-full flex items-center justify-center text-gray-400">
-        No graph data
-      </div>
-    )
-  }
+      const y =
+        centerY + radius * Math.sin(angle)
 
+      newNodes.push({
+        id: node.id,
+        position: { x, y },
+        data: { label: `ID: ${node.id}` },
+        style: {
+          background: "#2563eb",
+          color: "white",
+          padding: 12,
+          borderRadius: 12
+        }
+      })
+    })
+
+    const newEdges: Edge[] =
+      secondaries.map((node, index) => ({
+        id: `e${index}`,
+        source: primary?.id || "",
+        target: node.id,
+        animated: true,
+        style: {
+          strokeWidth: 2
+        }
+      }))
+
+    setNodes(newNodes)
+    setEdges(newEdges)
+
+  }, [graph])
+
+  if (!graph) return null
 
   return (
 
-    <div className="h-full w-full">
+    <div
+      ref={containerRef}
+      className="
+        w-full
+        h-[70vh]
+        max-h-[600px]
+        relative
+        overflow-hidden
+        rounded-xl
+      "
+    >
+
+      {/* LEGEND */}
+      <div className="
+        absolute top-4 right-4
+        bg-white shadow px-4 py-2
+        rounded-lg text-sm z-10
+      ">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-600 rounded-full" />
+          Primary
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="w-3 h-3 bg-blue-600 rounded-full" />
+          Secondary
+        </div>
+      </div>
 
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
+        panOnDrag
+        zoomOnScroll
       >
         <MiniMap />
         <Controls />
-        <Background />
+        <Background gap={18} size={1} />
       </ReactFlow>
 
     </div>
-
   )
 }
